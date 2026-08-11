@@ -13,7 +13,6 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -22,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -92,13 +90,10 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
         WorldCreationContext wcContext = uiState.getSettings();
         WorldDataConfiguration worldDataConfiguration = wcContext.dataConfiguration();
 
-        record Cookie(WorldGenSettings worldGenSettings) {}
-
         PackRepository packRepository = ((CreateWorldScreenAccessor) createWorldScreen).invokeGetDataPackSelectionSettings(worldDataConfiguration).getSecond();
-        WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
-        WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, 2);
-        CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
-                initConfig,
+        CompletableFuture<WorldCreationContext> completableFuture = WorldGenContextLoader.load(
+                worldDataConfiguration,
+                packRepository,
                 dataLoadContext -> {
                     WorldDimensions worldDimensions;
                     try {
@@ -110,16 +105,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
                         // Otherwise, create the dimensions using the world data (necessary if re-creating a world)
                         worldDimensions = WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen());
                     }
-                    WorldGenSettings worldGenSettings = new WorldGenSettings(wcContext.options(), worldDimensions);
-                    return new WorldLoader.DataLoadOutput<>(
-                            new Cookie(worldGenSettings),
-                            dataLoadContext.datapackDimensions()
-                    );
-                }
-                ,
-                (closeableResourceManager, reloadableServerResources, layeredRegistryAccess, cookie) -> {
-                    closeableResourceManager.close();
-                    return new WorldCreationContext(cookie.worldGenSettings, layeredRegistryAccess, reloadableServerResources, worldDataConfiguration);
+                    return new WorldGenSettings(wcContext.options(), worldDimensions);
                 },
                 loadingExecutor,
                 loadingExecutor
