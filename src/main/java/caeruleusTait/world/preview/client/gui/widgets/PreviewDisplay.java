@@ -339,6 +339,16 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         workManager.queueRange(new BlockPos(xMin, y, zMin), new BlockPos(xMax, y, zMax));
     }
 
+    public void resample() {
+        final BlockPos center = center();
+        final int xMin = center.getX() - (texWidth * scaleBlockPos / 2) - 1;
+        final int xMax = center.getX() + (texWidth * scaleBlockPos / 2) + 1;
+        final int zMin = center.getZ() - (texHeight * scaleBlockPos / 2) - 1;
+        final int zMax = center.getZ() + (texHeight * scaleBlockPos / 2) + 1;
+        final int y = center.getY();
+        workManager.resample(new BlockPos(xMin, y, zMin), new BlockPos(xMax, y, zMax));
+    }
+
     private record RenderHelper(
             PreviewSection dataSection,
             PreviewSection structureSection,

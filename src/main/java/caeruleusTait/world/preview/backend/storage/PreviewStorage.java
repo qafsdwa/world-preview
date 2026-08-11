@@ -128,6 +128,14 @@ public class PreviewStorage implements Serializable {
         return (x & XZ_MASK) << X_SHIFT | (z & XZ_MASK) << Z_SHIFT | (flags & FLAG_MASK) << FLAG_SHIFT;
     }
 
+    public void clear() {
+        for (Long2ObjectMap<PreviewBlock> ySec : blocks) {
+            synchronized (ySec) {
+                ySec.clear();
+            }
+        }
+    }
+
     @Serial
     private void writeObject(ObjectOutputStream oos) throws IOException {
         oos.defaultWriteObject();

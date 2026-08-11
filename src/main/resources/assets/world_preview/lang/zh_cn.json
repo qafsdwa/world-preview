@@ -10,6 +10,8 @@
   "world_preview.preview.btn-settings": "设置",
   "world_preview.preview.btn-caves": "切换突出显示洞穴生物群系",
   "world_preview.preview.btn-home": "将预览中心重置为 0 | 0\n\n§7§o这不一定是重生点！§r",
+  "world_preview.preview.btn-resample": "重新采样",
+  "world_preview.preview.btn-resample.tooltip": "清除已采样数据并重新采样当前可见区域",
   "world_preview.preview.btn-toggle-structures": "切换所有结构的可见性",
   "world_preview.preview.btn-toggle-structures.disabled": "切换所有结构的可见性\n\n§7§o结构采样已禁用，可以在设置中启用§r",
   "world_preview.preview.btn-reset-structures": "重置结构可见性",

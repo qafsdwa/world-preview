@@ -221,6 +221,13 @@ public class WorkManager {
         return true;
     }
 
+    public void resample(BlockPos topLeftBlock, BlockPos bottomRightBlock) {
+        if (previewStorage != null) {
+            previewStorage.clear();
+        }
+        queueRange(topLeftBlock, bottomRightBlock);
+    }
+
     public void queueRange(BlockPos topLeftBlock, BlockPos bottomRightBlock) {
         final ChunkPos topLeft = new ChunkPos(topLeftBlock);
         final ChunkPos bottomRight = new ChunkPos(bottomRightBlock);

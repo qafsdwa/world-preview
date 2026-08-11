@@ -10,6 +10,8 @@
   "world_preview.preview.btn-settings": "Settings",
   "world_preview.preview.btn-caves": "Toggle highlighting cave biomes",
   "world_preview.preview.btn-home": "Reset preview center to 0 | 0\n\n§7§oThis is not necessarily the spawn!§r",
+  "world_preview.preview.btn-resample": "Resample",
+  "world_preview.preview.btn-resample.tooltip": "Clear the sampled data and resample the currently visible area",
   "world_preview.preview.btn-toggle-structures": "Toggle the visibility of all structures",
   "world_preview.preview.btn-toggle-structures.disabled": "Toggle the visibility of all structures\n\n§7§oStructure sampling is disabled and can be enabled in the settings§r",
   "world_preview.preview.btn-reset-structures": "Reset structure visibility",

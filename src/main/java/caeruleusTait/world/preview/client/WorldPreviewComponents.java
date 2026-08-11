@@ -15,6 +15,8 @@ public class WorldPreviewComponents {
     public static final Component BTN_SETTINGS = Component.translatable("world_preview.preview.btn-settings");
     public static final Component BTN_CAVES = Component.translatable("world_preview.preview.btn-caves");
     public static final Component BTN_HOME = Component.translatable("world_preview.preview.btn-home");
+    public static final Component BTN_RESAMPLE = Component.translatable("world_preview.preview.btn-resample");
+    public static final Component BTN_RESAMPLE_TOOLTIP = Component.translatable("world_preview.preview.btn-resample.tooltip");
     public static final Component BTN_SWITCH_STRUCT_DISABLED = Component.translatable("world_preview.preview.btn-cycle.structures.disabled.tooltip");
     public static final Component BTN_TOGGLE_STRUCTURES = Component.translatable("world_preview.preview.btn-toggle-structures");
     public static final Component BTN_TOGGLE_STRUCTURES_DISABLED = Component.translatable("world_preview.preview.btn-toggle-structures.disabled");

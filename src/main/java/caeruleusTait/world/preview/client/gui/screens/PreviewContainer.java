@@ -102,6 +102,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
     private final Button saveSeed;
     private final Button settings;
     private final Button resetToZeroZero;
+    private final Button resampleButton;
     private final ToggleButton toggleCaves;
     private final ToggleButton toggleShowStructures;
     private final ToggleButton toggleBiomes;
@@ -202,6 +203,12 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         );
         resetToZeroZero.setTooltip(Tooltip.create(BTN_HOME));
         toRender.add(resetToZeroZero);
+
+        resampleButton = Button.builder(BTN_RESAMPLE, x -> this.resamplePreview())
+                .size(20, 20)
+                .build();
+        resampleButton.setTooltip(Tooltip.create(BTN_RESAMPLE_TOOLTIP));
+        toRender.add(resampleButton);
 
         resetDefaultStructureVisibility = Button
                 .builder(BTN_RESET_STRUCTURES, x -> Arrays.stream(allStructures).forEach(StructuresList.StructureEntry::reset))
@@ -769,6 +776,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         onTabButtonChange(switchBiomes, DisplayType.BIOMES);
     }
 
+    public void resamplePreview() {
+        previewDisplay.resample();
+    }
+
     private void onTabButtonChange(Button btn, DisplayType type) {
         biomesListHolder.visible = false;
         structuresListHolder.visible = false;
@@ -839,7 +850,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         // BOTTOM
 
-        seedEdit.setWidth(leftWidth - 1 - 22 * 2);
+        seedEdit.setWidth(leftWidth - 1 - 22 * 3);
         seedEdit.setX(left);
         seedEdit.setY(bottom + 1);
 
@@ -848,6 +859,9 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
         saveSeed.setX((left + leftWidth) - 22 - 20);
         saveSeed.setY(bottom);
+
+        resampleButton.setX((left + leftWidth) - 22 * 2 - 20);
+        resampleButton.setY(bottom);
 
         // TOP
         int cycleWith = leftWidth - 22 * 4;
