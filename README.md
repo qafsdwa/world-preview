@@ -43,6 +43,15 @@ Since version 1.1.0, there is also experimental support for opening the preview 
 
 <img alt="ingame" src="img/ingame.png" width="100%"/>
 
+Since the multiplayer update, the preview is also available in **multiplayer**. From the pause
+menu you can open the preview and enter a seed manually. World Preview rebuilds a fresh world
+locally from that seed (using the default worldgen parameters) so you can inspect biomes,
+structures and heightmaps before exploring on the server. The seed stays editable, can be saved
+and reused, and dimensions can be switched like in single-player.
+
+When opening the multiplayer preview, the **most recently saved seed** is selected by default
+(it falls back to a random seed when you have not saved any yet).
+
 ##### Moving on the preview
 
 Clicking and dragging on the map-part of the preview tab will move along the x and z axis.
