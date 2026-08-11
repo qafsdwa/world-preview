@@ -28,6 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -48,12 +49,17 @@ public class MultiplayerPreviewScreen extends Screen implements PreviewContainer
     private WorldCreationContext previewContext;
     private PackRepository packRepository;
     private Path tempDataPackDir;
-    private String seed = "";
+    private String seed = previewInitialSeed();
 
     private final Executor loadingExecutor = Executors.newFixedThreadPool(2);
 
     public MultiplayerPreviewScreen() {
         super(WorldPreviewComponents.TITLE_FULL);
+    }
+
+    private String previewInitialSeed() {
+        final List<String> saved = worldPreview.cfg().savedSeeds;
+        return saved.isEmpty() ? "" : saved.get(saved.size() - 1);
     }
 
     @Override
