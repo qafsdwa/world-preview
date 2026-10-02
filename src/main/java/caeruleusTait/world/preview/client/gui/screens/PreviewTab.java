@@ -19,6 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -67,6 +68,11 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
     }
 
     @Override
+    public Component getTabExtraNarration() {
+        return Component.empty();
+    }
+
+    @Override
     public void visitChildren(Consumer<AbstractWidget> consumer) {
         previewContainer.widgets().forEach(consumer);
     }
@@ -95,7 +101,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
 
         PackRepository packRepository = ((CreateWorldScreenAccessor) createWorldScreen).invokeGetDataPackSelectionSettings(worldDataConfiguration).getSecond();
         WorldLoader.PackConfig packConfig = new WorldLoader.PackConfig(packRepository, worldDataConfiguration, false, true);
-        WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, 2);
+        WorldLoader.InitConfig initConfig = new WorldLoader.InitConfig(packConfig, Commands.CommandSelection.INTEGRATED, LevelBasedPermissionSet.GAMEMASTER);
         CompletableFuture<WorldCreationContext> completableFuture = WorldLoader.load(
                 initConfig,
                 dataLoadContext -> {
@@ -103,7 +109,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
                     try {
                         // If a WorldPreset is available, use it to generate the dimensions
                         ResourceKey<WorldPreset> worldPresetKey = uiState.getWorldType().preset().unwrapKey().orElseThrow();
-                        WorldPreset worldPreset = dataLoadContext.datapackWorldgen().registryOrThrow(Registries.WORLD_PRESET).getOrThrow(worldPresetKey);
+                        WorldPreset worldPreset = dataLoadContext.datapackWorldgen().lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(worldPresetKey).value();
                         worldDimensions = worldPreset.createWorldDimensions();
                     } catch(NullPointerException | NoSuchElementException | IllegalStateException ex) {
                         // Otherwise, create the dimensions using the world data (necessary if re-creating a world)
@@ -147,9 +153,9 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
         if (!worldPreview.cfg().cacheInNew) {
             return;
         }
-        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(SAVING_PREVIEW));
+        minecraft.setScreen(new PreviewCacheLoadingScreen(SAVING_PREVIEW));
         writeCacheFile(previewContainer.workManager().previewStorage(), cacheDir().resolve(filename(seed)));
-        minecraft.forceSetScreen(createWorldScreen);
+        minecraft.setScreen(createWorldScreen);
     }
 
     @Override
@@ -158,9 +164,9 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
             return new PreviewStorage(yMin, yMax);
         }
 
-        minecraft.forceSetScreen(new PreviewCacheLoadingScreen(LOADING_PREVIEW));
+        minecraft.setScreen(new PreviewCacheLoadingScreen(LOADING_PREVIEW));
         final PreviewStorage res = readCacheFile(yMin, yMax, cacheDir().resolve(filename(seed)));
-        minecraft.forceSetScreen(createWorldScreen);
+        minecraft.setScreen(createWorldScreen);
         return res;
     }
 

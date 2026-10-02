@@ -4,13 +4,13 @@ import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.widgets.ToggleButton;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         super(minecraft, width, height, x, y, 24);
     }
 
-    public StructureEntry createEntry(short id, ResourceLocation resourceLocation, NativeImage icon, Item item, String name, boolean show, boolean showByDefault) {
+    public StructureEntry createEntry(short id, Identifier resourceLocation, NativeImage icon, Item item, String name, boolean show, boolean showByDefault) {
         return new StructureEntry(id, resourceLocation, icon, item, name, show, showByDefault);
     }
 
@@ -40,8 +40,8 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         super.replaceEntries(entryList);
 
         // If we have more than one page, make sure we don't let the scrollbar run away
-        double maxScroll = Math.max(0.0, super.getItemCount() * super.itemHeight - super.height);
-        if(super.getScrollAmount() > maxScroll) {
+        double maxScroll = Math.max(0.0, super.getItemCount() * super.defaultEntryHeight - super.height);
+        if(super.scrollAmount() > maxScroll) {
             // Make sure that the top entry is visible
             super.setScrollAmount(maxScroll);
         }
@@ -56,19 +56,19 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         private final int iconWidth;
         private final int iconHeight;
         private final String name;
-        private final Tooltip tooltip;
+        private final Component tooltip;
         private final boolean showByDefault;
         private final boolean isPrimaryNamespace;
 
         private boolean show;
         public final ToggleButton toggleVisible;
 
-        public StructureEntry(short id, ResourceLocation resourceLocation, @NotNull NativeImage icon, @Nullable Item item, String name, boolean show, boolean showByDefault) {
+        public StructureEntry(short id, Identifier resourceLocation, @NotNull NativeImage icon, @Nullable Item item, String name, boolean show, boolean showByDefault) {
             this.id = id;
             this.item = item;
             this.itemStack = this.item == null ? null : new ItemStack(this.item, 1);
             this.icon = icon;
-            this.iconTexture = new DynamicTexture(this.icon);
+            this.iconTexture = WorldPreviewClient.createDynamicTexture("world_preview_structure_icon", this.icon);
             this.iconWidth = this.icon.getWidth();
             this.iconHeight = this.icon.getHeight();
             this.showByDefault = showByDefault;
@@ -91,7 +91,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
             }
 
             String tag = "§5§o" + resourceLocation.getNamespace() + "§r\n§9" + resourceLocation.getPath() + "§r";
-            this.tooltip = Tooltip.create(Component.literal(this.name + "\n\n" + tag));
+            this.tooltip = Component.literal(this.name + "\n\n" + tag);
         }
 
         public void reset() {
@@ -108,7 +108,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         }
 
         @Override
-        public Tooltip tooltip() {
+        public Component tooltip() {
             return tooltip;
         }
 
@@ -118,39 +118,36 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
         }
 
         @Override
-        public void render(
-                GuiGraphics guiGraphics,
-                int index,
-                int top,
-                int left,
-                int width,
-                int height,
+        public void extractContent(
+                GuiGraphicsExtractor guiGraphics,
                 int mouseX,
                 int mouseY,
-                boolean bl,
+                boolean hovered,
                 float partialTick
         ) {
+            final int left = getX();
+            final int top = getY();
             final int xMin = left + 2;
             final int yMin = top + 2;
             final int xMax = xMin + iconWidth;
             final int yMax = yMin + iconHeight;
 
             if (item != null) {
-                guiGraphics.renderItem(itemStack, xMin, yMin);
+                guiGraphics.item(itemStack, xMin, yMin);
             } else {
-                WorldPreviewClient.renderTexture(iconTexture, xMin, yMin, xMax, yMax);
+                WorldPreviewClient.renderTexture(guiGraphics, iconTexture, xMin, yMin, xMax, yMax);
             }
             String formatName = isPrimaryNamespace ? name : "§o" + name;
-            guiGraphics.drawString(minecraft.font, formatName, left + 16 + 4, top + 6, 0xFFFFFF);
+            guiGraphics.text(minecraft.font, formatName, left + 16 + 4, top + 6, 0xFFFFFF);
             toggleVisible.setPosition(getRowRight() - 22, top);
-            toggleVisible.render(guiGraphics, mouseX, mouseY, partialTick);
+            toggleVisible.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            if (toggleVisible.isMouseOver(mouseX, mouseY)) {
-                toggleVisible.onClick(mouseX, mouseY);
+            if (toggleVisible.isMouseOver(event.x(), event.y())) {
+                toggleVisible.onClick(event, doubleClick);
             }
             return true;
         }

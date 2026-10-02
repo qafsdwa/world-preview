@@ -1,13 +1,14 @@
 package caeruleusTait.world.preview.mixin;
 
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.Aquifer;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(Aquifer.NoiseBasedAquifer.class)
 public abstract class NoiseBasedAquiferMixin {
@@ -16,31 +17,29 @@ public abstract class NoiseBasedAquiferMixin {
     @Shadow
     private NoiseChunk noiseChunk;
 
-    @ModifyVariable(
-            method = "<init>",
-            at = @At(value = "STORE"),
-            ordinal = 2
-    )
-    private int fixMaxPosX(int k) {
-        return k + invokeGridX(((NoiseChunkAccessor)noiseChunk).getCellCountXZ() * cellWidth());
+    @Unique
+    private int world_preview$sampleRegionWidth() {
+        return ((NoiseChunkAccessor) this.noiseChunk).getCellCountXZ() * ((NoiseChunkAccessor) this.noiseChunk).getNoiseSettings().getCellWidth();
     }
 
-    @ModifyVariable(
+    /**
+     * The preview samples noise over multiple chunks inside a single NoiseChunk,
+     * but vanilla sizes the aquifer grid for the single ChunkPos it is given.
+     * Extend the grid so it covers the full sampled region.
+     */
+    @Redirect(
             method = "<init>",
-            at = @At(value = "STORE"),
-            ordinal = 5
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ChunkPos;getMaxBlockX()I")
     )
-    private int fixMaxPosZ(int k) {
-        return k + invokeGridZ(((NoiseChunkAccessor)noiseChunk).getCellCountXZ() * cellWidth());
+    private int fixMaxPosX(ChunkPos pos) {
+        return pos.getMinBlockX() + this.world_preview$sampleRegionWidth() - 1;
     }
 
-    @Invoker
-    abstract int invokeGridX(int x);
-
-    @Invoker
-    abstract int invokeGridZ(int z);
-
-    private int cellWidth() {
-        return ((NoiseChunkAccessor) noiseChunk).getNoiseSettings().getCellWidth();
+    @Redirect(
+            method = "<init>",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ChunkPos;getMaxBlockZ()I")
+    )
+    private int fixMaxPosZ(ChunkPos pos) {
+        return pos.getMinBlockZ() + this.world_preview$sampleRegionWidth() - 1;
     }
 }

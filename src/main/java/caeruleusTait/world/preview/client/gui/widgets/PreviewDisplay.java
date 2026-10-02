@@ -11,17 +11,15 @@ import caeruleusTait.world.preview.client.WorldPreviewClient;
 import caeruleusTait.world.preview.client.gui.PreviewDisplayDataProvider;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BiomesList;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexSorting;
+import net.minecraft.client.input.MouseButtonEvent;
 import it.unimi.dsi.fastutil.shorts.Short2LongMap;
 import it.unimi.dsi.fastutil.shorts.Short2LongOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
@@ -33,7 +31,6 @@ import net.minecraft.world.level.levelgen.NoiseRouterData;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Matrix4f;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -117,7 +114,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     public void resizeImage() {
         closeDisplayTextures();
         previewImg = new NativeImage(NativeImage.Format.RGBA, texWidth, texHeight, true);
-        previewTexture = new DynamicTexture(previewImg);
+        previewTexture = WorldPreviewClient.createDynamicTexture("world_preview_map", previewImg);
         scaleBlockPos = (QuartPos.SIZE / renderSettings.quartExpand()) * renderSettings.quartStride();
         hoverHelperGridWidth = (texWidth / hoverHelperGridCellSize) + 1;
         hoverHelperGridHeight = (texHeight / hoverHelperGridCellSize) + 1;
@@ -142,9 +139,9 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         PreviewData.BiomeData[] rawBiomeMap = dataProvider.previewData().biomeId2BiomeData();
         structureRenderInfoMap = dataProvider.renderStructureMap();
         structureItems = dataProvider.structureItems();
-        structureIcons = Arrays.stream(dataProvider.structureIcons()).map(x -> new IconData(x, new DynamicTexture(x))).toArray(IconData[]::new);
-        playerIcon = new IconData(dataProvider.playerIcon(), new DynamicTexture(dataProvider.playerIcon()));
-        spawnIcon = new IconData(dataProvider.spawnIcon(), new DynamicTexture(dataProvider.spawnIcon()));
+        structureIcons = Arrays.stream(dataProvider.structureIcons()).map(x -> new IconData(x, WorldPreviewClient.createDynamicTexture("world_preview_structure", x))).toArray(IconData[]::new);
+        playerIcon = new IconData(dataProvider.playerIcon(), WorldPreviewClient.createDynamicTexture("world_preview_player", dataProvider.playerIcon()));
+        spawnIcon = new IconData(dataProvider.spawnIcon(), WorldPreviewClient.createDynamicTexture("world_preview_spawn", dataProvider.spawnIcon()));
         playerIcon.texture.upload();
         spawnIcon.texture.upload();
         Arrays.stream(structureIcons).map(IconData::texture).forEach(DynamicTexture::upload);
@@ -204,7 +201,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int x, int y, float f) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor guiGraphics, int x, int y, float f) {
         final int colorBorder = 0xFF666666;
 
         final int xMin = getX();
@@ -222,7 +219,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
             if (dataProvider.setupFailed()) {
                 previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
                 previewTexture.upload();
-                WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
+                WorldPreviewClient.renderTexture(guiGraphics, previewTexture, xMin, yMin, xMax, yMax);
 
                 final List<MutableComponent> lines = MSG_ERROR_SETUP_FAILED.getString().lines().map(Component::literal).toList();
 
@@ -232,16 +229,16 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                 for (int i = 0; i < lines.size(); ++i) {
                     final Component line = lines.get(i);
                     final int offsetY = i * (minecraft.font.lineHeight + 4);
-                    guiGraphics.drawCenteredString(minecraft.font, line, centerX, centerY + offsetY, 0xFFFFFF);
+                    guiGraphics.centeredText(minecraft.font, line, centerX, centerY + offsetY, 0xFFFFFF);
                 }
             } else if (dataProvider.isUpdating()) {
                 previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
                 previewTexture.upload();
-                WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
+                WorldPreviewClient.renderTexture(guiGraphics, previewTexture, xMin, yMin, xMax, yMax);
 
                 final int centerX = getX() + (width / 2);
                 final int centerY = getY() + (height / 2);
-                guiGraphics.drawCenteredString(minecraft.font, MSG_PREVIEW_SETUP_LOADING, centerX, centerY, 0xFFFFFF);
+                guiGraphics.centeredText(minecraft.font, MSG_PREVIEW_SETUP_LOADING, centerX, centerY, 0xFFFFFF);
             } else {
                 Arrays.fill(workingVisibleBiomes, (short) 0);
                 Arrays.fill(workingVisibleStructures, (short) 0);
@@ -252,20 +249,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                 previewTexture.upload();
 
                 // Render the main texture
-                WorldPreviewClient.renderTexture(previewTexture, xMin, yMin, xMax, yMax);
+                WorldPreviewClient.renderTexture(guiGraphics, previewTexture, xMin, yMin, xMax, yMax);
 
                 // Overlay structure icons
                 guiGraphics.enableScissor(xMin, yMin, xMax, yMax);
-                // Effectively set the guiscale to 1
-                Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)(winWidth), (float)(winHeight), 0.0F, 1000.0F, 21000.0F);
-                RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 
-                renderStructures(renderData, guiGraphics);
-                renderPlayerAndSpawn();
+                renderStructures(renderData, guiGraphics, guiScale);
+                renderPlayerAndSpawn(guiGraphics, guiScale);
 
-                // Make sure to reset the matrix
-                matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)(winWidth / guiScale), (float)(winHeight / guiScale), 0.0F, 1000.0F, 21000.0F);
-                RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
                 guiGraphics.disableScissor();
 
                 // Update hover info
@@ -275,7 +266,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                         .getScreenHeight();
 
                 biomesChanged();
-                updateTooltip(mouseX, mouseZ);
+                updateTooltip(guiGraphics, mouseX, mouseZ);
             }
         }
 
@@ -288,7 +279,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         // Render copied message
         if (coordinatesCopiedMsg != null) {
             guiGraphics.fill(xMin, yMax - 38, xMax, yMax - 19, 0xAA000000);
-            guiGraphics.drawCenteredString(minecraft.font, coordinatesCopiedMsg, xMin + ((xMax - xMin) / 2), yMax - 32, 0xFFFFFF);
+            guiGraphics.centeredText(minecraft.font, coordinatesCopiedMsg, xMin + ((xMax - xMin) / 2), yMax - 32, 0xFFFFFF);
             if (Duration.between(coordinatesCopiedTime, Instant.now()).toSeconds() >= 8) {
                 coordinatesCopiedMsg = null;
                 coordinatesCopiedTime = null;
@@ -303,7 +294,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         long sum = frametimes.stream().reduce(0L, Long::sum);
 
         if (config.showFrameTime) {
-            guiGraphics.drawString(minecraft.font, sum / frametimes.size() + " ms", 5, 5, 0xFFFFFF);
+            guiGraphics.text(minecraft.font, sum / frametimes.size() + " ms", 5, 5, 0xFFFFFF);
         }
     }
 
@@ -321,8 +312,8 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     private void putHoverStructEntry(TextureCoordinate pos, StructHoverHelperEntry entry) {
-        int cellX = Math.max(0, Math.min(hoverHelperGridWidth - 1, pos.x / hoverHelperGridCellSize));
-        int cellZ = Math.max(0, Math.min(hoverHelperGridHeight - 1, pos.z / hoverHelperGridCellSize));
+        int cellX = Math.max(0, Math.min(hoverHelperGridWidth - 1, pos.x() / hoverHelperGridCellSize));
+        int cellZ = Math.max(0, Math.min(hoverHelperGridHeight - 1, pos.z() / hoverHelperGridCellSize));
         hoverHelperGrid[(cellX * hoverHelperGridHeight) + cellZ].entries.add(entry);
     }
 
@@ -483,7 +474,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                                 color
                         );
                     } else {
-                        previewImg.setPixelRGBA(texX, texZ, color);
+                        previewImg.setPixelABGR(texX, texZ, color);
                     }
 
                     texZ += quartExpand;
@@ -495,12 +486,10 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         }
     }
 
-    private void renderStructures(List<RenderHelper> renderData, GuiGraphics guiGraphics) {
+    private void renderStructures(List<RenderHelper> renderData, GuiGraphicsExtractor guiGraphics, double guiScale) {
         if (!config.sampleStructures) {
             return;
         }
-
-        final double guiScale = minecraft.getWindow().getGuiScale();
 
         // Draw structures
         //  - Do this in a separate RenderHelper loop to ensure that the biome data is overwritten
@@ -544,10 +533,24 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                 final int rXMax = rXMin + icon.getWidth();
                 final int rZMax = rZMin + icon.getHeight();
 
+                // The icons are rendered in texel space, i.e. independent of the gui scale
+                final int gXMin = getX() + (int) Math.round(texStartX / guiScale);
+                final int gZMin = getY() + (int) Math.round(texStartZ / guiScale);
+                final int gWidth = Math.max(1, (int) Math.round(icon.getWidth() / guiScale));
+                final int gHeight = Math.max(1, (int) Math.round(icon.getHeight() / guiScale));
+
                 if (item != null) {
-                    guiGraphics.renderItem(item, rXMin, rZMin);
+                    guiGraphics.item(item, gXMin, gZMin);
                 } else if (iconTexture != null) {
-                    WorldPreviewClient.renderTexture(iconTexture, rXMin, rZMin, rXMax, rZMax);
+                    guiGraphics.blit(
+                            iconTexture.getTextureView(),
+                            iconTexture.getSampler(),
+                            gXMin,
+                            gZMin,
+                            gXMin + gWidth,
+                            gZMin + gHeight,
+                            0.0F, 1.0F, 0.0F, 1.0F
+                    );
                 }
 
                 putHoverStructEntry(
@@ -561,25 +564,24 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         }
     }
 
-    private void renderPlayerAndSpawn() {
+    private void renderPlayerAndSpawn(GuiGraphicsExtractor guiGraphics, double guiScale) {
         if (!config.showPlayer) {
             return;
         }
 
         PreviewDisplayDataProvider.PlayerData playerData = dataProvider.getPlayerData(minecraft.getUser().getProfileId());
         if (playerData.currentPos() != null) {
-            renderStickyIcon(playerIcon, playerData.currentPos());
+            renderStickyIcon(guiGraphics, guiScale, playerIcon, playerData.currentPos());
         }
         if (playerData.spawnPos() != null) {
-            renderStickyIcon(spawnIcon, playerData.spawnPos());
+            renderStickyIcon(guiGraphics, guiScale, spawnIcon, playerData.spawnPos());
         }
     }
 
     /**
      * Render the player and spawn icons in double the size
      */
-    private void renderStickyIcon(IconData iconData, BlockPos pos) {
-        final double guiScale = minecraft.getWindow().getGuiScale();
+    private void renderStickyIcon(GuiGraphicsExtractor guiGraphics, double guiScale, IconData iconData, BlockPos pos) {
         final NativeImage icon = iconData.img;
 
         TextureCoordinate texCenter = blockToTexture(pos);
@@ -597,7 +599,20 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         final int rXMax = rXMin + (icon.getWidth() * 2);
         final int rZMax = rZMin + (icon.getHeight() * 2);
 
-        WorldPreviewClient.renderTexture(iconData.texture, rXMin, rZMin, rXMax, rZMax);
+        final int gXMin = getX() + (int) Math.round(texStartX / guiScale);
+        final int gZMin = getY() + (int) Math.round(texStartZ / guiScale);
+        final int gWidth = Math.max(1, (int) Math.round((icon.getWidth() * 2) / guiScale));
+        final int gHeight = Math.max(1, (int) Math.round((icon.getHeight() * 2) / guiScale));
+
+        guiGraphics.blit(
+                iconData.texture.getTextureView(),
+                iconData.texture.getSampler(),
+                gXMin,
+                gZMin,
+                gXMin + gWidth,
+                gZMin + gHeight,
+                0.0F, 1.0F, 0.0F, 1.0F
+        );
     }
 
     private void biomesChanged() {
@@ -719,11 +734,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         return String.format("§5§o%s§r§5:%s§r", s.substring(0, idx), s.substring(idx + 1));
     }
 
-    private void setTooltipNow(Tooltip tooltip) {
-        minecraft.screen.setTooltipForNextRenderPass(tooltip, DefaultTooltipPositioner.INSTANCE, true);
-    }
-
-    private void updateTooltip(double mouseX, double mouseY) {
+    private void updateTooltip(GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
         HoverInfo hoverInfo = hoveredBiome(mouseX, mouseY);
         List<StructHoverHelperEntry> structuresInfos = hoveredStructures(mouseX, mouseY);
         if (hoverInfo == null && structuresInfos.isEmpty()) {
@@ -736,17 +747,17 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         if (!structuresInfos.isEmpty()) {
             var structure = structuresInfos.get(0).structure;
             if (config.showControls) {
-                setTooltipNow(Tooltip.create(Component.translatable(
+                graphics.setTooltipForNextFrame(Component.translatable(
                         "world_preview.preview-display.struct.tooltip.controls",
                         nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
-                )));
+                ), (int) mouseX, (int) mouseY);
             } else {
-                setTooltipNow(Tooltip.create(Component.translatable(
+                graphics.setTooltipForNextFrame(Component.translatable(
                         "world_preview.preview-display.struct.tooltip",
                         nameFormatter(dataProvider.structure4Id(structure.structureId()).name()),
                         blockPosTemplate.formatted(structure.center().getX(), structure.center().getY(), structure.center().getZ())
-                )));
+                ), (int) mouseX, (int) mouseY);
             }
             return;
         }
@@ -766,21 +777,21 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         }
 
         if (config.showControls) {
-            setTooltipNow(Tooltip.create(Component.translatable(
+            graphics.setTooltipForNextFrame(Component.translatable(
                     "world_preview.preview-display.tooltip.controls",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),
                     height,
                     noise
-            )));
+            ), (int) mouseX, (int) mouseY);
         } else {
-            setTooltipNow(Tooltip.create(Component.translatable(
+            graphics.setTooltipForNextFrame(Component.translatable(
                     "world_preview.preview-display.tooltip",
                     nameFormatter(hoverInfo.entry == null ? "<N/A>" : hoverInfo.entry.name()),
                     blockPosTemplate.formatted(hoverInfo.blockX, hoverInfo.blockY, hoverInfo.blockZ),
                     height,
                     noise
-                    )));
+                    ), (int) mouseX, (int) mouseY);
         }
     }
 
@@ -790,7 +801,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     @Override
-    public void onClick(double mouseX, double mouseY) {
+    public void onClick(MouseButtonEvent event, boolean doubleClick) {
         if (minecraft.screen != null) {
             minecraft.screen.setFocused(this);
         }
@@ -804,14 +815,14 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     @Override
-    protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
+    protected void onDrag(MouseButtonEvent event, double dragX, double dragY) {
         final double guiScale = minecraft.getWindow().getGuiScale();
         totalDragX -= (dragX * guiScale) * ((double) scaleBlockPos);
         totalDragZ -= (dragY * guiScale) * ((double) scaleBlockPos);
     }
 
     @Override
-    public void onRelease(double mouseX, double mouseY) {
+    public void onRelease(MouseButtonEvent event) {
 
         // If we did not click into the canvas at the start, then we ignore this release
         if(clicked == false) {
@@ -821,7 +832,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
         // Check if dragged was minimal
         if (Math.abs(totalDragX) <= 4 && Math.abs(totalDragZ) <= 4) {
-            HoverInfo hoverInfo = hoveredBiome(mouseX, mouseY);
+            HoverInfo hoverInfo = hoveredBiome(event.x(), event.y());
             if (hoverInfo == null || hoverInfo.entry == null) {
                 return;
             }
@@ -857,12 +868,12 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         // Copy TP command to clipboard on right click
-        if (this.clicked(mouseX, mouseY) && button == 1) {
+        if (this.isMouseOver(event.x(), event.y()) && event.button() == 1) {
             this.playDownSound(minecraft.getSoundManager());
 
-            final HoverInfo hoverInfo = hoveredBiome(mouseX, mouseY);
+            final HoverInfo hoverInfo = hoveredBiome(event.x(), event.y());
             if (hoverInfo == null) {
                 return true;
             }
@@ -879,7 +890,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
             return true;
         }
 
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private static int textureColor(int orig) {

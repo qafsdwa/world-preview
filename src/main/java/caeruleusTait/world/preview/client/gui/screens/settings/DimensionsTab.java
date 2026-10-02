@@ -5,13 +5,14 @@ import caeruleusTait.world.preview.WorldPreview;
 import caeruleusTait.world.preview.client.gui.widgets.WGLabel;
 import caeruleusTait.world.preview.client.gui.widgets.lists.BaseObjectSelectionList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.tabs.Tab;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,13 +25,19 @@ import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LI
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
 public class DimensionsTab implements Tab {
+
+    @Override
+    public Component getTabExtraNarration() {
+        return Component.empty();
+    }
+
     private final Minecraft minecraft;
     private final RenderSettings renderSettings;
 
     private final WGLabel headLabel;
     private final DimensionList dimensionList;
 
-    public DimensionsTab(Minecraft minecraft, List<ResourceLocation> levelStemKeys) {
+    public DimensionsTab(Minecraft minecraft, List<Identifier> levelStemKeys) {
         this.minecraft = minecraft;
         this.renderSettings = WorldPreview.get().renderSettings();
 
@@ -72,11 +79,11 @@ public class DimensionsTab implements Tab {
             super(minecraft, width, height, x, y, 16);
         }
 
-        public DimensionEntry entryFactory(ResourceLocation dimensionKey) {
+        public DimensionEntry entryFactory(Identifier dimensionKey) {
             return new DimensionEntry(dimensionKey);
         }
 
-        public void select(ResourceLocation dimensionKey) {
+        public void select(Identifier dimensionKey) {
             for (DimensionEntry entry : children()) {
                 if (entry.dimensionKey.equals(dimensionKey)) {
                     setSelected(entry);
@@ -87,10 +94,10 @@ public class DimensionsTab implements Tab {
         }
 
         public class DimensionEntry extends BaseObjectSelectionList.Entry<DimensionEntry> {
-            private final ResourceLocation dimensionKey;
+            private final Identifier dimensionKey;
             private final Component component;
 
-            public DimensionEntry(ResourceLocation dimensionKey) {
+            public DimensionEntry(Identifier dimensionKey) {
                 this.dimensionKey = dimensionKey;
                 this.component = Component.literal(dimensionKey.toString());
             }
@@ -101,24 +108,13 @@ public class DimensionsTab implements Tab {
             }
 
             @Override
-            public void render(
-                    GuiGraphics guiGraphics,
-                    int index,
-                    int top,
-                    int left,
-                    int width,
-                    int height,
-                    int mouseX,
-                    int mouseY,
-                    boolean bl,
-                    float partialTick
-            ) {
-                guiGraphics.drawString(minecraft.font, component, left + 5, top + 2, 16777215);
+            public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
+                guiGraphics.text(minecraft.font, component, getX() + 5, getY() + 2, 16777215);
             }
 
             @Override
-            public boolean mouseClicked(double d, double e, int i) {
-                if (i != 0) {
+            public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+                if (event.button() != 0) {
                     return false;
                 }
 

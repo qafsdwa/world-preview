@@ -4,7 +4,7 @@
 package caeruleusTait.world.preview.client.gui.widgets;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -41,12 +41,6 @@ public class WGLabel extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Do nothing...
-        return false;
-    }
-
-    @Override
     public void setX(int x) {
         super.setX(x);
         update();
@@ -70,8 +64,8 @@ public class WGLabel extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-        guiGraphics.drawString(font, component, startX, startY, color);
+    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int i, int j, float f) {
+        graphics.text(font, component, startX, startY, color);
     }
 
     @Override

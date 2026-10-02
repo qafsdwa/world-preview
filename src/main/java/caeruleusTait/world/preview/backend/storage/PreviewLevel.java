@@ -22,6 +22,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.attribute.EnvironmentAttributeReader;
+import net.minecraft.world.level.chunk.PalettedContainerFactory;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.*;
@@ -47,19 +49,19 @@ public class PreviewLevel implements WorldGenLevel {
 
     private final RegistryAccess registryAccess;
     private final LevelHeightAccessor levelHeightAccessor;
-    private final Registry<Biome> biomeRegistry;
+    private final PalettedContainerFactory palettedContainerFactory;
     private final Long2ObjectMap<ProtoChunk> chunks = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
     public PreviewLevel(RegistryAccess registryAccess, LevelHeightAccessor levelHeightAccessor) {
         this.registryAccess = registryAccess;
         this.levelHeightAccessor = levelHeightAccessor;
-        this.biomeRegistry = this.registryAccess.registryOrThrow(Registries.BIOME);
+        this.palettedContainerFactory = PalettedContainerFactory.create(registryAccess);
     }
 
     @Nullable
     @Override
     public ChunkAccess getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
-        return new ProtoChunk(new ChunkPos(x, z), UpgradeData.EMPTY, levelHeightAccessor, biomeRegistry, null);
+        return new ProtoChunk(new ChunkPos(x, z), UpgradeData.EMPTY, levelHeightAccessor, palettedContainerFactory, null);
 
         // Actually storing chunks would take up too much space
         /*
@@ -129,7 +131,7 @@ public class PreviewLevel implements WorldGenLevel {
     }
 
     @Override
-    public void playSound(@Nullable Player player, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
+    public void playSound(@Nullable Entity except, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
         throw new NotImplementedException("Not implemented");
     }
 
@@ -139,17 +141,12 @@ public class PreviewLevel implements WorldGenLevel {
     }
 
     @Override
-    public void levelEvent(@Nullable Player player, int type, BlockPos pos, int data) {
+    public void levelEvent(@Nullable Entity source, int type, BlockPos pos, int data) {
         throw new NotImplementedException("Not implemented");
     }
 
     @Override
     public void gameEvent(Holder<GameEvent> holder, Vec3 vec3, GameEvent.Context context) {
-        throw new NotImplementedException("Not implemented");
-    }
-
-    @Override
-    public float getShade(Direction direction, boolean shade) {
         throw new NotImplementedException("Not implemented");
     }
 
@@ -242,6 +239,11 @@ public class PreviewLevel implements WorldGenLevel {
     @Override
     public boolean isFluidAtPosition(BlockPos pos, Predicate<FluidState> predicate) {
         throw new NotImplementedException("Not implemented");
+    }
+
+    @Override
+    public EnvironmentAttributeReader environmentAttributes() {
+        return EnvironmentAttributeReader.EMPTY;
     }
 
     @Override

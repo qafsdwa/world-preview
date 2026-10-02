@@ -4,7 +4,7 @@ import caeruleusTait.world.preview.backend.WorkManager;
 import caeruleusTait.world.preview.backend.color.PreviewMappingData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -166,7 +166,7 @@ public class WorldPreview {
         }
     }
 
-    public void writeUserColorConfig(Map<ResourceLocation, PreviewMappingData.ColorEntry> userColorConfig) {
+    public void writeUserColorConfig(Map<Identifier, PreviewMappingData.ColorEntry> userColorConfig) {
         record Entry(int r, int g, int b, boolean cave) {}
         Map<String, Entry> writeData = userColorConfig.entrySet()
                 .stream()

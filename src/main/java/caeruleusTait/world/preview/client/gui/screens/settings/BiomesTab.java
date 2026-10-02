@@ -21,7 +21,7 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.dimension.LevelStem;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,6 +45,12 @@ import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LI
 import static caeruleusTait.world.preview.client.gui.screens.PreviewContainer.LINE_VSPACE;
 
 public class BiomesTab implements Tab {
+
+    @Override
+    public Component getTabExtraNarration() {
+        return Component.empty();
+    }
+
     private final PreviewContainer previewContainer;
     private final Minecraft minecraft;
     private final GridLayout layout = new GridLayout();
@@ -75,9 +81,8 @@ public class BiomesTab implements Tab {
         final int FULL_WIDTH = EDIT_WIDTH + LABEL_WIDTH + COLUMN_SPACING + 1; // +1 because of EditBox
 
         filterCycleButton = CycleButton
-                .builder(BiomeListFilter::toComponent)
+                .builder(BiomeListFilter::toComponent, BiomeListFilter.DIMENSION)
                 .withValues(BiomeListFilter.values())
-                .withInitialValue(BiomeListFilter.DIMENSION)
                 .create(
                         0,
                         0,
@@ -124,10 +129,6 @@ public class BiomesTab implements Tab {
                 })
                 .width(FULL_WIDTH)
                 .build();
-
-        hueBox.setFilter(x -> validateMaxInt(x, 360));
-        satBox.setFilter(x -> validateMaxInt(x, 100));
-        valBox.setFilter(x -> validateMaxInt(x, 100));
 
         Consumer<String> hsvConsumer = x -> {
             if (!blockUpdates) {
@@ -253,7 +254,14 @@ public class BiomesTab implements Tab {
     }
 
     private int intOrZero(String src) {
-        return src.isBlank() ? 0 : Integer.parseInt(src);
+        if (src.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(src);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private void updateIfChanged(EditBox box, int value) {
@@ -265,19 +273,22 @@ public class BiomesTab implements Tab {
 
     public enum BiomeListFilter {
         DIMENSION(x -> {
-            LevelStem levelStem = x.previewTab().levelStemRegistry().get(WorldPreview.get().renderSettings().dimension);
+            LevelStem levelStem = x.previewTab().levelStemRegistry()
+                    .get(WorldPreview.get().renderSettings().dimension)
+                    .map(Holder.Reference::value)
+                    .orElse(null);
             if (levelStem == null) {
                 return true;
             }
-            Set<ResourceLocation> supportedBiomes = levelStem.generator()
+            Set<Identifier> supportedBiomes = levelStem.generator()
                     .getBiomeSource()
                     .possibleBiomes()
                     .stream()
                     .map(Holder::unwrapKey)
                     .map(Optional::orElseThrow)
-                    .map(ResourceKey::location)
+                    .map(ResourceKey::identifier)
                     .collect(Collectors.toSet());
-            return supportedBiomes.contains(x.entry().key().location());
+            return supportedBiomes.contains(x.entry().key().identifier());
         }),
         ALL(x -> true),
         MISSING(x -> x.dataSource() == PreviewData.DataSource.MISSING),

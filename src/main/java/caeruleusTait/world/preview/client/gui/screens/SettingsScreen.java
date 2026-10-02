@@ -9,7 +9,8 @@ import caeruleusTait.world.preview.client.gui.screens.settings.DimensionsTab;
 import caeruleusTait.world.preview.client.gui.screens.settings.GeneralTab;
 import caeruleusTait.world.preview.client.gui.screens.settings.HeightmapTab;
 import caeruleusTait.world.preview.client.gui.screens.settings.SamplingTab;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.components.tabs.TabNavigationBar;
@@ -18,7 +19,7 @@ import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.Map;
@@ -27,9 +28,9 @@ import java.util.stream.Collectors;
 import static caeruleusTait.world.preview.client.WorldPreviewComponents.SETTINGS_TITLE;
 
 public class SettingsScreen extends Screen {
-    public static final ResourceLocation HEADER_SEPERATOR = new ResourceLocation("textures/gui/header_separator.png");
-    public static final ResourceLocation FOOTER_SEPERATOR = new ResourceLocation("textures/gui/footer_separator.png");
-    public static final ResourceLocation LIGHT_DIRT_BACKGROUND = new ResourceLocation("textures/gui/light_dirt_background.png");
+    public static final Identifier HEADER_SEPERATOR = Identifier.withDefaultNamespace("textures/gui/header_separator.png");
+    public static final Identifier FOOTER_SEPERATOR = Identifier.withDefaultNamespace("textures/gui/footer_separator.png");
+    public static final Identifier LIGHT_DIRT_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/light_dirt_background.png");
 
     private final Screen lastScreen;
     private final PreviewContainer previewContainer;
@@ -75,7 +76,7 @@ public class SettingsScreen extends Screen {
     @Override
     public void repositionElements() {
         if (tabNavigationBar != null) {
-            tabNavigationBar.setWidth(this.width);
+            tabNavigationBar.updateWidth(this.width);
             tabNavigationBar.arrangeElements();
 
             bottomButtons.arrangeElements();
@@ -87,19 +88,19 @@ public class SettingsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        guiGraphics.blit(FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
-        super.render(guiGraphics, i, j, f);
+    public void extractRenderState(GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
+        guiGraphics.blit(RenderPipelines.GUI_TEXTURED, FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
+        super.extractRenderState(guiGraphics, i, j, f);
     }
 
     @Override
     public void onClose() {
-        Map<ResourceLocation, PreviewMappingData.ColorEntry> toWrite = previewContainer.allBiomes()
+        Map<Identifier, PreviewMappingData.ColorEntry> toWrite = previewContainer.allBiomes()
                 .stream()
                 .filter(x -> x.dataSource() == PreviewData.DataSource.CONFIG)
                 .collect(
                         Collectors.toMap(
-                                x -> x.entry().key().location(),
+                                x -> x.entry().key().identifier(),
                                 x -> new PreviewMappingData.ColorEntry(PreviewData.DataSource.CONFIG, x.color(), x.isCave(), x.name())
                         )
                 );
