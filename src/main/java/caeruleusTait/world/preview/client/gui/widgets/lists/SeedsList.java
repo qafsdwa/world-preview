@@ -90,13 +90,13 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
             if (!seedCanChange) {
                 return true;
             }
-            if (moveUpButton.isHovered()) {
+            if (moveUpButton.isMouseOver(event.x(), event.y())) {
                 moveUpButton.mouseClicked(event, doubleClick);
             }
-            if (moveDownButton.isHovered()) {
+            if (moveDownButton.isMouseOver(event.x(), event.y())) {
                 moveDownButton.mouseClicked(event, doubleClick);
             }
-            if (deleteButton.isHovered()) {
+            if (deleteButton.isMouseOver(event.x(), event.y())) {
                 deleteButton.mouseClicked(event, doubleClick);
             }
             if (event.button() == 0 && event.x() < seedsList.getRowRight() - buttonsLeftInset) {

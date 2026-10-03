@@ -829,7 +829,8 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
             return;
         }
         final int newX = theList.getX() + (theList.active ? 4096 : -4096);
-        theList.setPosition(newX, theList.getY());
+        // Route through updateSizeAndPosition so the entries follow the list
+        theList.updateSizeAndPosition(theList.getWidth(), theList.getHeight(), newX, theList.getY());
     }
 
     private void onTabButtonChange(Button btn, DisplayType type) {
@@ -961,11 +962,10 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         //  - new row
         top += LINE_HEIGHT + LINE_VSPACE;
 
-        biomesList.setPosition(left, top);
-        biomesList.setSize(leftWidth, bottom - top - LINE_VSPACE);
-
-        seedsList.setPosition(left, top);
-        seedsList.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        // updateSizeAndPosition is required (instead of setPosition+setSize):
+        // entries store absolute positions and are only re-laid-out by this call.
+        biomesList.updateSizeAndPosition(leftWidth, bottom - top - LINE_VSPACE, left, top);
+        seedsList.updateSizeAndPosition(leftWidth, bottom - top - LINE_VSPACE, left, top);
 
         // BOTTOM
         //  - new row
@@ -974,8 +974,7 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         resetDefaultStructureVisibility.setPosition(left, bottom);
         resetDefaultStructureVisibility.setWidth(leftWidth);
 
-        structuresList.setPosition(left, top);
-        structuresList.setSize(leftWidth, bottom - top - LINE_VSPACE);
+        structuresList.updateSizeAndPosition(leftWidth, bottom - top - LINE_VSPACE, left, top);
 
         moveList(biomesList);
         moveList(structuresList);

@@ -223,8 +223,7 @@ public class BiomesTab implements Tab {
         filterCycleButton.setWidth(leftWidth);
 
         int listTop = top + LINE_HEIGHT + LINE_VSPACE;
-        biomesList.setPosition(left, listTop);
-        biomesList.setSize(leftWidth, bottom - listTop - LINE_VSPACE);
+        biomesList.updateSizeAndPosition(leftWidth, bottom - listTop - LINE_VSPACE, left, listTop);
         biomesList.replaceEntries(filterCycleButton.getValue().apply(previewContainer.allBiomes()));
 
         colorChooser.setSquareSize(screenRectangle.width() / 4);

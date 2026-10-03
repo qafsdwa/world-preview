@@ -49,3 +49,4 @@ mods.toml
 pack.mcmeta
 settings.gradle
 .zcode/
+net/

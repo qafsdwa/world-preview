@@ -207,8 +207,7 @@ public class HeightmapTab implements Tab {
 
         //      New Line
         topL += (LINE_HEIGHT / 2) + LINE_VSPACE;
-        heightPresetList.setPosition(leftL, topL);
-        heightPresetList.setSize(secWidth, bottomL - topL - LINE_VSPACE);
+        heightPresetList.updateSizeAndPosition(secWidth, bottomL - topL - LINE_VSPACE, leftL, topL);
 
         // RIGHT COLUMN
         //  - TOP
@@ -217,8 +216,7 @@ public class HeightmapTab implements Tab {
 
         //      New Line
         topR += (LINE_HEIGHT / 2) + LINE_VSPACE;
-        colormapList.setPosition(leftR, topR);
-        colormapList.setSize(secWidth, bottomR - topR + LINE_HEIGHT);
+        colormapList.updateSizeAndPosition(secWidth, bottomR - topR + LINE_HEIGHT, leftR, topR);
     }
 
 

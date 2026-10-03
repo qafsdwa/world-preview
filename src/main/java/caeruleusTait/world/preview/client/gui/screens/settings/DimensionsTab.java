@@ -70,8 +70,7 @@ public class DimensionsTab implements Tab {
         headLabel.setPosition(left, top);
 
         top += LINE_HEIGHT + LINE_VSPACE;
-        dimensionList.setPosition(left, top);
-        dimensionList.setSize(width, bottom - top);
+        dimensionList.updateSizeAndPosition(width, bottom - top, left, top);
     }
 
     public class DimensionList extends BaseObjectSelectionList<DimensionList.DimensionEntry> {
