@@ -16,6 +16,14 @@ repositories {
 
 loom {
 	accessWidenerPath = file("src/main/resources/world_preview.accesswidener")
+
+	runs {
+		client {
+			// Fixed dev username so the offline UUID (and therefore the ops.json
+			// entry) stays stable across dev-client launches.
+			programArgs "--username", "Dev"
+		}
+	}
 }
 
 dependencies {
