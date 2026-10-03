@@ -1,5 +1,7 @@
 {
   "world_preview.preview.title": "Preview",
+"world_preview.preview.btn-move-up": "Move this seed up",
+"world_preview.preview.btn-move-down": "Move this seed down",
   "world_preview.preview.title-full": "World Preview",
   "world_preview.preview.saving": "Saving current preview to disk",
   "world_preview.preview.loading": "Loading current preview to disk",

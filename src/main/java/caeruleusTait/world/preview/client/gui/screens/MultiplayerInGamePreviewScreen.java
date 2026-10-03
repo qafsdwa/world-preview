@@ -85,6 +85,13 @@ public class MultiplayerInGamePreviewScreen extends Screen implements PreviewCon
 
     public MultiplayerInGamePreviewScreen() {
         super(TITLE_FULL);
+
+        // Instead of a random seed, start with the first entry of the maintained
+        // seed list (falls back to random when the list is empty).
+        final List<String> savedSeeds = worldPreview.cfg().savedSeeds;
+        if (!savedSeeds.isEmpty()) {
+            currentSeed = savedSeeds.get(0);
+        }
     }
 
     @Override

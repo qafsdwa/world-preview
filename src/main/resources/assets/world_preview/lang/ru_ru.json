@@ -1,5 +1,7 @@
 {
   "world_preview.multiplayer.world-type": "Тип мира (только предпросмотр)",
+"world_preview.preview.btn-move-up": "Переместить сид вверх",
+"world_preview.preview.btn-move-down": "Переместить сид вниз",
   "world_preview.preview.title": "Предпросмотр",
   "world_preview.preview.title-full": "Предпросмотр мира",
   "world_preview.preview.saving": "Сохранение текущего предпросмотра на диск",

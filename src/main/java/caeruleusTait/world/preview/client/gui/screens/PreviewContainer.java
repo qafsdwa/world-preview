@@ -59,6 +59,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -776,6 +777,21 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
 
     public void deleteSeed(String seed) {
         cfg.savedSeeds.remove(seed);
+        updateSeedListWidget();
+    }
+
+    /**
+     * Moves a seed within the saved-seed list by swapping it with its neighbor.
+     * {@code offset} is {@code -1} to move up and {@code +1} to move down; the
+     * first element of the list is the seed the multiplayer preview starts with.
+     */
+    public void moveSeed(String seed, int offset) {
+        final int idx = cfg.savedSeeds.indexOf(seed);
+        final int newIdx = idx + offset;
+        if (idx < 0 || newIdx < 0 || newIdx >= cfg.savedSeeds.size()) {
+            return;
+        }
+        Collections.swap(cfg.savedSeeds, idx, newIdx);
         updateSeedListWidget();
     }
 
