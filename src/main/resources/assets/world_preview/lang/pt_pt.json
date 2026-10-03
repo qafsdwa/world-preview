@@ -1,4 +1,5 @@
 {
+  "world_preview.multiplayer.world-type": "Tipo de mundo (apenas pré-visualização)",
   "world_preview.preview.title": "Visualização",
   "world_preview.preview.title-full": "Visualização do Mundo",
   "world_preview.preview.saving": "A gravar visualização do mundo para o disco",

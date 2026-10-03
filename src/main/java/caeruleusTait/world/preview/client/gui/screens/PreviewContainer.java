@@ -433,6 +433,14 @@ public class PreviewContainer implements AutoCloseable, PreviewDisplayDataProvid
         }
     }
 
+    /**
+     * Requests a full preview rebuild -- used by screens that own extra
+     * preview-affecting settings (e.g. the multiplayer world-type selector).
+     */
+    public synchronized void refreshSettings() {
+        updateSettings();
+    }
+
     private synchronized void updateSettings() {
         if (inhibitUpdates) {
             return;

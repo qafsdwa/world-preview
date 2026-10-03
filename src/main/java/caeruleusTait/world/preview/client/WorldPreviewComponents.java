@@ -8,6 +8,7 @@ public class WorldPreviewComponents {
     public static final Component TITLE_FULL = Component.translatable("world_preview.preview.title-full");
     public static final Component SAVING_PREVIEW = Component.translatable("world_preview.preview.saving");
     public static final Component LOADING_PREVIEW = Component.translatable("world_preview.preview.loading");
+    public static final Component WORLD_TYPE_LABEL = Component.translatable("world_preview.multiplayer.world-type");
     public static final Component SEED_FIELD = Component.translatable("world_preview.preview.seed-field");
     public static final Component SEED_LABEL = Component.translatable("world_preview.preview.seed-label");
     public static final Component BTN_RANDOM = Component.translatable("world_preview.preview.btn-random");

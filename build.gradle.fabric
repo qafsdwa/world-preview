@@ -16,10 +16,6 @@ repositories {
 
 loom {
 	accessWidenerPath = file("src/main/resources/world_preview.accesswidener")
-
-	mixin {
-		defaultRefmapName = "world_preview.refmap.json"
-	}
 }
 
 dependencies {

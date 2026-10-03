@@ -15,7 +15,9 @@ Finally, if you are on Fabric you also need to download the
 
 ## Usage
 
-*World Preview* adds a new `Preview` tab to the Singleplayer menu.
+*World Preview* adds a new `Preview` tab to the Singleplayer menu. While
+connected to a multiplayer server, a preview can also be opened from the pause
+menu (enter the seed manually there; see the FAQ for the limitations).
 
 <img alt="biomes" src="img/open.png" width="100%"/>
 
@@ -70,8 +72,9 @@ This table shows the current support status for the Minecraft version.
 
 | Minecraft Version | Status    |
 |-------------------|-----------|
-| `1.20.x`          | Bugfixes  |
-| `1.21.x`          | Supported |
+| `1.20.x`          | Bugfixes (upstream) |
+| `1.21.x`          | Supported (upstream) |
+| `26.1.x`          | Supported (this fork) |
 
 ## FAQ
 
@@ -83,7 +86,12 @@ This table shows the current support status for the Minecraft version.
 
 **Q:** *Will Multiplayer be supported?*
 
-**A:** No.
+**A:** Yes, with limitations. While connected to a multiplayer server, the pause
+menu offers a *World Preview* button. Because the client does not know the
+server's datapack worldgen configuration, the preview must be generated from
+vanilla (plus client-local datapacks) rules: you enter the seed yourself and the
+map is calculated on the client. If the server uses datapack worldgen or a
+non-standard world type, the preview may not match the actual terrain.
 
 ---
 

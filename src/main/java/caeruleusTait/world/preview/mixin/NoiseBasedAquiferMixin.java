@@ -19,7 +19,7 @@ public abstract class NoiseBasedAquiferMixin {
 
     @Unique
     private int world_preview$sampleRegionWidth() {
-        return ((NoiseChunkAccessor) this.noiseChunk).getCellCountXZ() * ((NoiseChunkAccessor) this.noiseChunk).getNoiseSettings().getCellWidth();
+        return ((NoiseChunkAccessor) this.noiseChunk).getCellCountXZ() * ((NoiseChunkAccessor) this.noiseChunk).getCellWidth();
     }
 
     /**

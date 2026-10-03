@@ -196,7 +196,7 @@ public class PreviewTab implements Tab, AutoCloseable, PreviewContainerDataProvi
 
     @Override
     public @Nullable Path tempDataPackDir() {
-        return ((CreateWorldScreenAccessor) createWorldScreen).invokeGetTempDataPackDir();
+        return ((CreateWorldScreenAccessor) createWorldScreen).getTempDataPackDir();
     }
 
     @Override
