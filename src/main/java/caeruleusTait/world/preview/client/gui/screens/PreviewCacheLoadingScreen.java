@@ -13,6 +13,6 @@ public class PreviewCacheLoadingScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.centeredText(Minecraft.getInstance().font, title, width / 2, height / 2, 0xFFFFFF);
+        guiGraphics.centeredText(Minecraft.getInstance().font, title, width / 2, height / 2, 0xFFFFFFFF);
     }
 }

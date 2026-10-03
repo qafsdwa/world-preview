@@ -138,7 +138,7 @@ public class StructuresList extends BaseObjectSelectionList<StructuresList.Struc
                 WorldPreviewClient.renderTexture(guiGraphics, iconTexture, xMin, yMin, xMax, yMax);
             }
             String formatName = isPrimaryNamespace ? name : "§o" + name;
-            guiGraphics.text(minecraft.font, formatName, left + 16 + 4, top + 6, 0xFFFFFF);
+            guiGraphics.text(minecraft.font, formatName, left + 16 + 4, top + 6, 0xFFFFFFFF);
             toggleVisible.setPosition(getRowRight() - 22, top);
             toggleVisible.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         }

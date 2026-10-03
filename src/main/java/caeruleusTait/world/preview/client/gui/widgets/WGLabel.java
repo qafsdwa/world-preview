@@ -23,7 +23,7 @@ public class WGLabel extends AbstractWidget {
         super(_x, _y, _width, _height, _component);
         font = _font;
         component = _component;
-        color = _color;
+        color = _color | 0xFF000000;
         alignment = _alignment;
 
         update();

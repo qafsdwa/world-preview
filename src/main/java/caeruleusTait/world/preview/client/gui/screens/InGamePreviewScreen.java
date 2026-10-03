@@ -71,7 +71,7 @@ public class InGamePreviewScreen extends Screen implements PreviewContainerDataP
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.centeredText(minecraft.font, WorldPreviewComponents.TITLE_FULL, width / 2, 6, 0xFFFFFF);
+        guiGraphics.centeredText(minecraft.font, WorldPreviewComponents.TITLE_FULL, width / 2, 6, 0xFFFFFFFF);
         guiGraphics.blit(RenderPipelines.GUI_TEXTURED, FOOTER_SEPARATOR, 0, Mth.roundToward(this.height - 30, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
     }
 

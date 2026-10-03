@@ -229,7 +229,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
                 for (int i = 0; i < lines.size(); ++i) {
                     final Component line = lines.get(i);
                     final int offsetY = i * (minecraft.font.lineHeight + 4);
-                    guiGraphics.centeredText(minecraft.font, line, centerX, centerY + offsetY, 0xFFFFFF);
+                    guiGraphics.centeredText(minecraft.font, line, centerX, centerY + offsetY, 0xFFFFFFFF);
                 }
             } else if (dataProvider.isUpdating()) {
                 previewImg.fillRect(0, 0, texWidth, texHeight, 0xFF000000);
@@ -238,7 +238,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
 
                 final int centerX = getX() + (width / 2);
                 final int centerY = getY() + (height / 2);
-                guiGraphics.centeredText(minecraft.font, MSG_PREVIEW_SETUP_LOADING, centerX, centerY, 0xFFFFFF);
+                guiGraphics.centeredText(minecraft.font, MSG_PREVIEW_SETUP_LOADING, centerX, centerY, 0xFFFFFFFF);
             } else {
                 Arrays.fill(workingVisibleBiomes, (short) 0);
                 Arrays.fill(workingVisibleStructures, (short) 0);
@@ -279,7 +279,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         // Render copied message
         if (coordinatesCopiedMsg != null) {
             guiGraphics.fill(xMin, yMax - 38, xMax, yMax - 19, 0xAA000000);
-            guiGraphics.centeredText(minecraft.font, coordinatesCopiedMsg, xMin + ((xMax - xMin) / 2), yMax - 32, 0xFFFFFF);
+            guiGraphics.centeredText(minecraft.font, coordinatesCopiedMsg, xMin + ((xMax - xMin) / 2), yMax - 32, 0xFFFFFFFF);
             if (Duration.between(coordinatesCopiedTime, Instant.now()).toSeconds() >= 8) {
                 coordinatesCopiedMsg = null;
                 coordinatesCopiedTime = null;
@@ -294,7 +294,7 @@ public class PreviewDisplay extends AbstractWidget implements AutoCloseable {
         long sum = frametimes.stream().reduce(0L, Long::sum);
 
         if (config.showFrameTime) {
-            guiGraphics.text(minecraft.font, sum / frametimes.size() + " ms", 5, 5, 0xFFFFFF);
+            guiGraphics.text(minecraft.font, sum / frametimes.size() + " ms", 5, 5, 0xFFFFFFFF);
         }
     }
 

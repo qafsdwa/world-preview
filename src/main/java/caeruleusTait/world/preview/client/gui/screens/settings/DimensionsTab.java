@@ -109,7 +109,7 @@ public class DimensionsTab implements Tab {
 
             @Override
             public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                guiGraphics.text(minecraft.font, component, getX() + 5, getY() + 2, 16777215);
+                guiGraphics.text(minecraft.font, component, getX() + 5, getY() + 2, 0xFFFFFFFF);
             }
 
             @Override

@@ -125,7 +125,7 @@ public class MultiplayerInGamePreviewScreen extends Screen implements PreviewCon
     public void extractRenderState(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
 
-        guiGraphics.centeredText(minecraft.font, TITLE_FULL, width / 2, 6, 0xFFFFFF);
+        guiGraphics.centeredText(minecraft.font, TITLE_FULL, width / 2, 6, 0xFFFFFFFF);
         guiGraphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 FOOTER_SEPARATOR,

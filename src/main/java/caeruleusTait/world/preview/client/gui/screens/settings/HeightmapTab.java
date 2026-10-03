@@ -256,7 +256,7 @@ public class HeightmapTab implements Tab {
 
             @Override
             public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                guiGraphics.text(minecraft.font, displayString, getX() + 4, getY() + 2, 0xFFFFFF);
+                guiGraphics.text(minecraft.font, displayString, getX() + 4, getY() + 2, 0xFFFFFFFF);
             }
 
             @Override
@@ -307,7 +307,7 @@ public class HeightmapTab implements Tab {
 
             @Override
             public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                guiGraphics.text(minecraft.font, name, getX() + 4, getY() + 2, 0xFFFFFF);
+                guiGraphics.text(minecraft.font, name, getX() + 4, getY() + 2, 0xFFFFFFFF);
 
                 final int left = getX();
                 final int top = getY();

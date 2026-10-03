@@ -57,7 +57,7 @@ public class SeedsList extends BaseObjectSelectionList<SeedsList.SeedEntry> {
 
         @Override
         public void extractContent(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-            guiGraphics.text(seedsList.minecraft.font, seed, getX() + 4, getY() + 6, seedCanChange ? 0xFFFFFF : 0x999999);
+            guiGraphics.text(seedsList.minecraft.font, seed, getX() + 4, getY() + 6, seedCanChange ? 0xFFFFFFFF : 0xFF999999);
             deleteButton.setPosition(seedsList.getRowRight() - 22, getY());
             deleteButton.extractRenderState(guiGraphics, mouseX, mouseY, partialTick);
         }

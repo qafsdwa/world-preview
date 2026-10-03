@@ -173,7 +173,7 @@ public class BiomesList extends BaseObjectSelectionList<BiomesList.BiomeEntry> {
         public void extractContent(@NotNull GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
             guiGraphics.fill(getX() + 3, getY() + 1, getX() + 13, getY() + 11, nativeColor(color));
             String formatName = isPrimaryNamespace ? name : "§o" + name;
-            guiGraphics.text(BiomesList.this.minecraft.font, formatName, getX() + 16, getY() + 2, 0xFFFFFF);
+            guiGraphics.text(BiomesList.this.minecraft.font, formatName, getX() + 16, getY() + 2, 0xFFFFFFFF);
         }
 
         @Override
